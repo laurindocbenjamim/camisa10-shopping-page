@@ -73,7 +73,7 @@ export default function App() {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [showCookieConsent, setShowCookieConsent] = useState(false);
-  const [checkoutStep, setCheckoutStep] = useState<'home' | 'checkout' | 'shipping' | 'success' | 'error'>('home');
+  const [checkoutStep, setCheckoutStep] = useState<'home' | 'checkout' | 'shipping' | 'success' | 'error' | 'notFound' | 'methodNotAllowed'>('home');
   const [shippingData, setShippingData] = useState({
     name: '',
     email: '',
@@ -1097,6 +1097,50 @@ export default function App() {
               className="px-12 py-5 border border-brand-white text-brand-white hover:bg-brand-white hover:text-brand-black transition-all font-bold uppercase tracking-[0.2em] text-xs"
             >
               Tentar Novamente
+            </button>
+          </motion.div>
+        </div>
+      ) : checkoutStep === 'notFound' ? (
+        <div className="min-h-screen flex items-center justify-center text-center p-6">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="max-w-xl space-y-12"
+          >
+            <div className="w-24 h-24 bg-brand-white/10 rounded-full flex items-center justify-center mx-auto text-brand-white">
+              <Search size={48} />
+            </div>
+            <div className="space-y-4">
+              <h1 className="font-display text-6xl font-bold tracking-tighter uppercase italic line-height-none">404</h1>
+              <p className="text-brand-white/50 uppercase tracking-[0.2em] text-sm">Página não encontrada. A página que procuras não existe.</p>
+            </div>
+            <button
+              onClick={() => setCheckoutStep('home')}
+              className="px-12 py-5 bg-brand-gold text-brand-black hover:bg-brand-white transition-all font-bold uppercase tracking-[0.2em] text-xs"
+            >
+              Voltar ao Início
+            </button>
+          </motion.div>
+        </div>
+      ) : checkoutStep === 'methodNotAllowed' ? (
+        <div className="min-h-screen flex items-center justify-center text-center p-6">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="max-w-xl space-y-12"
+          >
+            <div className="w-24 h-24 bg-brand-white/10 rounded-full flex items-center justify-center mx-auto text-brand-white">
+              <AlertTriangle size={48} />
+            </div>
+            <div className="space-y-4">
+              <h1 className="font-display text-6xl font-bold tracking-tighter uppercase italic line-height-none">405</h1>
+              <p className="text-brand-white/50 uppercase tracking-[0.2em] text-sm">Método não permitido. O pedido não é permitido neste endpoint.</p>
+            </div>
+            <button
+              onClick={() => setCheckoutStep('home')}
+              className="px-12 py-5 bg-brand-gold text-brand-black hover:bg-brand-white transition-all font-bold uppercase tracking-[0.2em] text-xs"
+            >
+              Voltar ao Início
             </button>
           </motion.div>
         </div>
