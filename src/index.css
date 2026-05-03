@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  
+  --color-brand-black: #050505;
+  --color-brand-white: #ffffff;
+  --color-brand-accent: #38b000; /* Pitch green */
+  --color-brand-navy: #0a1d37; /* From logo */
+  --color-brand-gold: #c5a059; /* From logo */
+}
+
+@layer base {
+  body {
+    @apply bg-brand-black text-brand-white font-sans antialiased;
+    background-image: radial-gradient(circle at top center, #0a1d37 0%, #050505 100%);
+    background-attachment: fixed;
+  }
+}
+
+.stadium-border {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stadium-card {
+  background-color: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stadium-card:hover {
+  border-color: var(--color-brand-gold);
+  box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
+}
+
+.marquee-container {
+  @apply overflow-hidden whitespace-nowrap py-4 border-y border-brand-white/10;
+}
+
+.marquee-content {
+  display: inline-block;
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c5a059;
+  border-radius: 10px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+    background-image: none !important;
+  }
+  #invoice {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+}

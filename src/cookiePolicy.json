@@ -1,0 +1,29 @@
+{
+  "title": "Política de Cookies",
+  "description": "Utilizamos cookies para melhorar a sua experiência na Camisa 10. Alguns são necessários para o funcionamento do site (como o seu carrinho), enquanto outros nos ajudam a entender como utiliza a nossa loja.",
+  "sections": [
+    {
+      "id": "essential",
+      "title": "Cookies Essenciais",
+      "description": "Necessários para o funcionamento básico, como gestão de sessão e carrinho de compras. Não podem ser desativados.",
+      "required": true
+    },
+    {
+      "id": "analytics",
+      "title": "Análise e Performance",
+      "description": "Ajudam-nos a medir o tráfego e a melhorar as funcionalidades da loja.",
+      "required": false
+    },
+    {
+      "id": "marketing",
+      "title": "Marketing",
+      "description": "Utilizados para mostrar publicidade relevante aos seus interesses.",
+      "required": false
+    }
+  ],
+  "buttons": {
+    "acceptAll": "Aceitar Todos",
+    "decline": "Recusar Não Essenciais",
+    "settings": "Configurações"
+  }
+}
