@@ -59,6 +59,10 @@ interface ShopContextType {
   cartTotal: number;
   selectedProduct: Product | null;
   setSelectedProduct: (product: Product | null) => void;
+  activeCategory: string;
+  setActiveCategory: (category: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -154,8 +158,17 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const [activeCategory, setActiveCategory] = useState('Todos');
+  const [searchQuery, setSearchQuery] = useState('');
+
   return (
-    <ShopContext.Provider value={{ products, mostSold, cart, isLoading, isCartOpen, setIsCartOpen, addToCart, removeFromCart, updateQuantity, cartTotal, selectedProduct, setSelectedProduct }}>
+    <ShopContext.Provider value={{ 
+      products, mostSold, cart, isLoading, isCartOpen, setIsCartOpen, 
+      addToCart, removeFromCart, updateQuantity, cartTotal, 
+      selectedProduct, setSelectedProduct,
+      activeCategory, setActiveCategory,
+      searchQuery, setSearchQuery
+    }}>
       {children}
     </ShopContext.Provider>
   );
