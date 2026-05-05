@@ -12,7 +12,7 @@ import { useCheckout, CheckoutProvider } from './CheckoutContext';
 import FAQModal from './components/FAQModal';
 import ShippingPolicyModal from './components/ShippingPolicyModal';
 import { CategoryModal } from './components/CategoryModal';
-import { Trophy, Activity, History, Globe } from 'lucide-react';
+import { History, Globe } from 'lucide-react';
 
 const DEFAULT_IMAGE = "https://placehold.co/400x500/0f0f0f/c5a059?text=Sem+Imagem";
 
