@@ -17,10 +17,5 @@ export default defineConfig(({ mode }) => {
       allowedHosts: ['camisa10-shopping.onrender.com'],
       hmr: process.env.DISABLE_HMR !== 'true',
     },
-    ssgOptions: {
-      script: 'async',
-      formatting: 'minify',
-      onFinished() { console.log('SSG finished') },
-    },
   };
 });
