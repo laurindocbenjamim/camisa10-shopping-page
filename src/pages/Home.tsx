@@ -16,11 +16,23 @@ export default function Home() {
 
   const recommendedProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 4);
 
+  const categoryMap: Record<string, string> = {
+    'Todos': 'Todos',
+    'Retro': 'Retro',
+    'Equipamentos': 'Equipamento',
+    'Seleção': 'Seleção',
+    'Novidades': 'prime',
+    'Acessórios': 'Acessório'
+  };
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeCategory === 'Todos' || product.category === activeCategory;
+      
+    const targetCategory = categoryMap[activeCategory] || activeCategory;
+    const matchesCategory = activeCategory === 'Todos' || product.category.toLowerCase() === targetCategory.toLowerCase();
+    
     return matchesSearch && matchesCategory;
   });
 
@@ -100,10 +112,13 @@ export default function Home() {
             <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tighter">COLEÇÃO 2026</h2>
           </div>
           <div className="flex gap-6 overflow-x-auto pb-2 w-full md:w-auto">
-            {['Todos', 'Retro', 'Equipamento', 'Seleção', 'Novidades', 'Acessórios'].map((cat) => (
+            {['Todos', 'Retro', 'Equipamentos', 'Seleção', 'Novidades', 'Acessórios'].map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => {
+                  setActiveCategory(cat);
+                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className={`text-[10px] font-bold uppercase tracking-[0.2em] whitespace-nowrap transition-colors border-b-2 pb-1 ${activeCategory === cat ? 'text-brand-gold border-brand-gold' : 'text-brand-white/50 border-transparent hover:text-brand-gold'
                   }`}
               >
