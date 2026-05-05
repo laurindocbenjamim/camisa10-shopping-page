@@ -3,6 +3,7 @@ import cookiePolicy from './cookiePolicy.json';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShoppingCart, X, Menu, ArrowRight, Instagram, Github, Trophy, Goal, Activity, Search, ChevronLeft, ChevronRight, Minus, Plus, Trash2, Package, CheckCircle2, AlertTriangle, Printer, Download, Mail, Loader2 } from 'lucide-react';
 import { catalogApi, cartApi, ordersApi } from './api';
+import { Helmet } from 'react-helmet-async';
 
 interface Product {
   id: string; // Backend uses string UUIDs
@@ -443,6 +444,23 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-brand-black text-brand-white selection:bg-brand-gold selection:text-brand-black">
+      <Helmet>
+        <title>{checkoutStep === 'home' ? 'Camisa 10 | Home' : `Camisa 10 | ${checkoutStep.charAt(0).toUpperCase() + checkoutStep.slice(1)}`}</title>
+        <meta name="description" content="A Melhor Loja de Camisas de Futebol" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Store",
+            "name": "Camisa 10",
+            "url": "https://camisa10.com.br",
+            "description": "A melhor loja de camisas de futebol do Brasil.",
+            "logo": "https://camisa10.com.br/apple-touch-icon.png",
+            "sameAs": [
+              "https://instagram.com/camisa10"
+            ]
+          })}
+        </script>
+      </Helmet>
       {/* Cookie Consent Banner */}
       <AnimatePresence>
         {showCookieConsent && (
