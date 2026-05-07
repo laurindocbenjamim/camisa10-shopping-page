@@ -50,7 +50,8 @@ export async function apiRequest(endpoint: string, options: any = {}) {
 }
 
 export const catalogApi = {
-  getProducts: () => apiRequest("/products"),
+  getProducts: (params?: { name?: string; category?: string; skip?: number; limit?: number }) => 
+    apiRequest("/products", { params }),
   getProduct: (id: string) => apiRequest(`/products/${id}`),
   getMostSold: () => apiRequest("/products/most-sold"),
 };
