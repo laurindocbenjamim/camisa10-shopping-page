@@ -74,12 +74,36 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('Todos');
+
+  const categoryMap: Record<string, string> = {
+    'Todos': '',
+    'Retro': 'Retro',
+    'Equipamentos': 'Equipamento',
+    'Seleção': 'Selecao',
+    'Novidades': 'Novidades',
+    'Acessórios': 'Acessorios'
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const categoryParam = categoryMap[activeCategory] || activeCategory;
+      const params: any = { limit: 100 };
+      if (searchQuery) params.name = searchQuery;
+      if (categoryParam && categoryParam !== 'Todos') params.category = categoryParam;
+      
+      const productData = await catalogApi.getProducts(params);
+      setProducts(productData.items.map(mapBackendProduct));
+    } catch (err) {
+      console.error("Failed to fetch products", err);
+    }
+  };
 
   useEffect(() => {
     const initData = async () => {
       try {
-        const productData = await catalogApi.getProducts();
-        setProducts(productData.items.map(mapBackendProduct));
+        await fetchProducts();
 
         const mostSoldData = await catalogApi.getMostSold();
         setMostSold(Array.isArray(mostSoldData) ? mostSoldData.map(mapBackendProduct) : []);
@@ -94,6 +118,10 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
     };
     initData();
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [searchQuery, activeCategory]);
 
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => total + (item.price_at_addition * item.quantity), 0);
@@ -157,9 +185,6 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
       setCart(previousCart);
     }
   };
-
-  const [activeCategory, setActiveCategory] = useState('Todos');
-  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <ShopContext.Provider value={{ 

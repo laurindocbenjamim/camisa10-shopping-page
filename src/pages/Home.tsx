@@ -14,27 +14,7 @@ export default function Home() {
     addToCart
   } = useShop();
 
-  const recommendedProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 4);
-
-  const categoryMap: Record<string, string> = {
-    'Todos': 'Todos',
-    'Retro': 'Retro',
-    'Equipamentos': 'Equipamento',
-    'Seleção': 'Seleção',
-    'Novidades': 'prime',
-    'Acessórios': 'Acessório'
-  };
-
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const targetCategory = categoryMap[activeCategory] || activeCategory;
-    const matchesCategory = activeCategory === 'Todos' || product.category.toLowerCase() === targetCategory.toLowerCase();
-    
-    return matchesSearch && matchesCategory;
-  });
+  const filteredProducts = products;
 
   return (
     <>
