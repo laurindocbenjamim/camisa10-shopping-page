@@ -11,7 +11,8 @@ export default function Home() {
     activeCategory, 
     setActiveCategory, 
     setSelectedProduct,
-    addToCart
+    addToCart,
+    categories
   } = useShop();
 
   const filteredProducts = products;
@@ -20,7 +21,7 @@ export default function Home() {
     <>
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <img
             src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=1920"
             alt="Stadium Background"
@@ -30,7 +31,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-brand-black/40 via-transparent to-brand-black" />
         </div>
 
-        <div className="relative z-10 text-center px-6">
+        <div className="relative z-10 text-center px-6 pointer-events-none">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -53,14 +54,18 @@ export default function Home() {
               CAMISA 10
             </h1>
             <p className="text-brand-white/50 text-sm uppercase tracking-[0.5em] mb-12 font-bold">Vista a Lenda.</p>
-            <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
-              <a
-                href="#products"
+            <div className="flex flex-col md:flex-row gap-4 justify-center items-center pointer-events-auto">
+              <button
+                onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
                 className="group relative px-10 py-4 bg-brand-gold text-brand-black font-bold uppercase tracking-widest overflow-hidden transition-all hover:bg-brand-white hover:scale-105"
               >
                 <span className="relative z-10">Explorar Loja</span>
-              </a>
+              </button>
               <button
+                onClick={() => {
+                  setActiveCategory('Novidades');
+                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className="px-10 py-4 border border-brand-white/20 hover:border-brand-gold hover:bg-brand-gold hover:text-brand-black transition-all font-bold uppercase tracking-widest cursor-pointer"
               >
                 Novidades
@@ -92,7 +97,7 @@ export default function Home() {
             <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tighter">COLEÇÃO 2026</h2>
           </div>
           <div className="flex gap-6 overflow-x-auto pb-2 w-full md:w-auto">
-            {['Todos', 'Retro', 'Equipamentos', 'Seleção', 'Novidades', 'Acessórios'].map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => {
@@ -108,102 +113,201 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product, idx) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: (idx % 4) * 0.1 }}
-                className="group cursor-pointer"
-                onClick={() => setSelectedProduct(product)}
-              >
-                <div className="relative aspect-[4/5] overflow-hidden bg-[#0f0f0f] mb-4 border border-brand-white/5">
-                  <img
-                    src={product.image || undefined}
-                    alt={product.name}
-                    className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-80 ${product.hoverImage ? 'group-hover:opacity-0' : ''}`}
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      if (product.hoverImage && target.src !== product.hoverImage) {
-                        target.src = product.hoverImage;
-                      }
-                    }}
-                  />
-                  {product.hoverImage && (
-                    <img
-                      src={product.hoverImage}
-                      alt={`${product.name} hover`}
-                      className="absolute inset-0 w-full h-full object-cover transition-all duration-700 scale-110 group-hover:scale-105 opacity-0 group-hover:opacity-100"
-                      referrerPolicy="no-referrer"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-brand-navy/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-0 left-0 w-full p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
-                    <button
-                      type="button"
-                      disabled={product.stockQuantity <= 0}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart(product);
-                      }}
-                      className="w-full bg-brand-white text-brand-black py-3 font-bold uppercase text-[10px] tracking-widest hover:bg-brand-gold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {product.stockQuantity <= 0 ? 'Esgotado' : 'Adicionar ao Carrinho'}
-                    </button>
-                  </div>
-                  <div className="absolute top-4 left-4 flex flex-col gap-2">
-                    <span className="text-[9px] font-bold uppercase tracking-widest bg-brand-gold text-brand-black px-2 py-1 w-fit">
-                      {product.category}
-                    </span>
-                    {product.status === 'promotion' && (
-                      <span className="text-[9px] font-bold uppercase tracking-widest bg-red-600 text-white px-2 py-1 w-fit animate-pulse">
-                        PROMOÇÃO
-                      </span>
+        {activeCategory === 'Todos' && filteredProducts.length > 0 ? (
+          // Group by Category and Subcategory
+          Array.from(new Set(filteredProducts.map(p => p.category))).map(category => (
+            <div key={category} className="mb-16">
+              <h3 className="font-display text-2xl font-bold tracking-tighter mb-8 border-b border-brand-white/10 pb-4 text-brand-gold uppercase">{category}</h3>
+              
+              {Array.from(new Set(filteredProducts.filter(p => p.category === category).map(p => p.subcategory || 'Outros'))).map(subcategory => {
+                const subProducts = filteredProducts.filter(p => p.category === category && (p.subcategory || 'Outros') === subcategory);
+                if (subProducts.length === 0) return null;
+                return (
+                  <div key={`${category}-${subcategory}`} className="mb-12">
+                    {subcategory !== 'Outros' && (
+                      <h4 className="text-sm font-bold tracking-widest uppercase mb-6 text-brand-white/50">{subcategory}</h4>
                     )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+                      {subProducts.map((product, idx) => (
+                        <motion.div
+                          key={product.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: (idx % 4) * 0.1 }}
+                          className="group cursor-pointer"
+                          onClick={() => setSelectedProduct(product)}
+                        >
+                          <div className="relative aspect-[4/5] overflow-hidden bg-[#0f0f0f] mb-4 border border-brand-white/5">
+                            <img
+                              src={product.image || undefined}
+                              alt={product.name}
+                              className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-80 ${product.hoverImage ? 'group-hover:opacity-0' : ''}`}
+                              referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (product.hoverImage && target.src !== product.hoverImage) {
+                                  target.src = product.hoverImage;
+                                }
+                              }}
+                            />
+                            {product.hoverImage && (
+                              <img
+                                src={product.hoverImage}
+                                alt={`${product.name} hover`}
+                                className="absolute inset-0 w-full h-full object-cover transition-all duration-700 scale-110 group-hover:scale-105 opacity-0 group-hover:opacity-100"
+                                referrerPolicy="no-referrer"
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-brand-navy/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute bottom-0 left-0 w-full p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
+                              <button
+                                type="button"
+                                disabled={product.stockQuantity <= 0}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedProduct(product);
+                                }}
+                                className="w-full bg-brand-white text-brand-black py-3 font-bold uppercase text-[10px] tracking-widest hover:bg-brand-gold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {product.stockQuantity <= 0 ? 'Esgotado' : 'Ver Detalhes'}
+                              </button>
+                            </div>
+                            <div className="absolute top-4 left-4 flex flex-col gap-2">
+                              {product.status === 'promotion' && (
+                                <span className="text-[9px] font-bold uppercase tracking-widest bg-red-600 text-white px-2 py-1 w-fit animate-pulse">
+                                  PROMOÇÃO
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-start px-1">
+                            <div>
+                              <h3 className="font-bold text-xs uppercase tracking-wider group-hover:text-brand-gold transition-colors">{product.name}</h3>
+                              <p className="text-brand-white/40 text-[9px] mt-1 uppercase tracking-widest text-red-600">
+                                {product.stockQuantity <= 0 ? 'Stock esgotado' : ''}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              {product.status === 'promotion' && product.promotionalPrice ? (
+                                <>
+                                  <span className="text-brand-white/40 text-[10px] line-through">€{product.price.toFixed(2)}</span>
+                                  <span className="font-display font-bold text-brand-gold">€{product.promotionalPrice.toFixed(2)}</span>
+                                  <span className="text-red-500 text-[9px] font-bold mt-0.5">
+                                    -{Math.round(((product.price - product.promotionalPrice) / product.price) * 100)}%
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="font-display font-bold text-brand-gold">€{product.price.toFixed(2)}</span>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between items-start px-1">
-                  <div>
-                    <h3 className="font-bold text-xs uppercase tracking-wider group-hover:text-brand-gold transition-colors">{product.name}</h3>
-                    <p className="text-brand-white/40 text-[9px] mt-1 uppercase tracking-widest text-red-600">
-                      {product.stockQuantity <= 0 ? 'Stock esgotado' : ''}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    {product.status === 'promotion' && product.promotionalPrice ? (
-                      <>
-                        <span className="text-brand-white/40 text-[10px] line-through">€{product.price.toFixed(2)}</span>
-                        <span className="font-display font-bold text-brand-gold">€{product.promotionalPrice.toFixed(2)}</span>
-                        <span className="text-red-500 text-[9px] font-bold mt-0.5">
-                          -{Math.round(((product.price - product.promotionalPrice) / product.price) * 100)}%
-                        </span>
-                      </>
-                    ) : (
-                      <span className="font-display font-bold text-brand-gold">€{product.price.toFixed(2)}</span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <div className="col-span-full py-20 text-center">
-              <p className="text-brand-white/40 uppercase tracking-[0.3em] text-sm">Nenhum produto encontrado para "{searchQuery}"</p>
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setActiveCategory('Todos');
-                }}
-                className="mt-6 text-brand-gold font-bold uppercase tracking-widest text-[10px] hover:text-brand-white transition-colors"
-              >
-                Limpar Filtros
-              </button>
+                );
+              })}
             </div>
-          )}
-        </div>
+          ))
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product, idx) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: (idx % 4) * 0.1 }}
+                  className="group cursor-pointer"
+                  onClick={() => setSelectedProduct(product)}
+                >
+                  <div className="relative aspect-[4/5] overflow-hidden bg-[#0f0f0f] mb-4 border border-brand-white/5">
+                    <img
+                      src={product.image || undefined}
+                      alt={product.name}
+                      className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-80 ${product.hoverImage ? 'group-hover:opacity-0' : ''}`}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (product.hoverImage && target.src !== product.hoverImage) {
+                          target.src = product.hoverImage;
+                        }
+                      }}
+                    />
+                    {product.hoverImage && (
+                      <img
+                        src={product.hoverImage}
+                        alt={`${product.name} hover`}
+                        className="absolute inset-0 w-full h-full object-cover transition-all duration-700 scale-110 group-hover:scale-105 opacity-0 group-hover:opacity-100"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-brand-navy/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute bottom-0 left-0 w-full p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
+                      <button
+                        type="button"
+                        disabled={product.stockQuantity <= 0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedProduct(product);
+                        }}
+                        className="w-full bg-brand-white text-brand-black py-3 font-bold uppercase text-[10px] tracking-widest hover:bg-brand-gold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {product.stockQuantity <= 0 ? 'Esgotado' : 'Ver Detalhes'}
+                      </button>
+                    </div>
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      <span className="text-[9px] font-bold uppercase tracking-widest bg-brand-gold text-brand-black px-2 py-1 w-fit">
+                        {product.category}
+                      </span>
+                      {product.status === 'promotion' && (
+                        <span className="text-[9px] font-bold uppercase tracking-widest bg-red-600 text-white px-2 py-1 w-fit animate-pulse">
+                          PROMOÇÃO
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-start px-1">
+                    <div>
+                      <h3 className="font-bold text-xs uppercase tracking-wider group-hover:text-brand-gold transition-colors">{product.name}</h3>
+                      <p className="text-brand-white/40 text-[9px] mt-1 uppercase tracking-widest text-red-600">
+                        {product.stockQuantity <= 0 ? 'Stock esgotado' : ''}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      {product.status === 'promotion' && product.promotionalPrice ? (
+                        <>
+                          <span className="text-brand-white/40 text-[10px] line-through">€{product.price.toFixed(2)}</span>
+                          <span className="font-display font-bold text-brand-gold">€{product.promotionalPrice.toFixed(2)}</span>
+                          <span className="text-red-500 text-[9px] font-bold mt-0.5">
+                            -{Math.round(((product.price - product.promotionalPrice) / product.price) * 100)}%
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-display font-bold text-brand-gold">€{product.price.toFixed(2)}</span>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center">
+                <p className="text-brand-white/40 uppercase tracking-[0.3em] text-sm">Nenhum produto encontrado para "{searchQuery}"</p>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setActiveCategory('Todos');
+                  }}
+                  className="mt-6 text-brand-gold font-bold uppercase tracking-widest text-[10px] hover:text-brand-white transition-colors"
+                >
+                  Limpar Filtros
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Most Sold Section */}

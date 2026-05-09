@@ -98,8 +98,8 @@ function AppContent() {
       {location.pathname === '/' && (
         <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-brand-black/90 backdrop-blur-md border-b border-brand-white/10 py-4' : 'bg-transparent py-6'}`}>
           <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-            <div className="flex items-center gap-8">
-              <button onClick={() => setIsMenuOpen(true)} className="hover:text-brand-gold transition-colors cursor-pointer">
+            <div className="flex items-center gap-4 md:gap-8">
+              <button onClick={() => setIsMenuOpen(true)} className="md:hidden hover:text-brand-gold transition-colors cursor-pointer">
                 <Menu size={24} />
               </button>
               <div className="flex flex-col cursor-pointer" onClick={() => navigate('/')}>
@@ -169,6 +169,36 @@ function AppContent() {
           </div>
         </nav>
       )}
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: '-100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '-100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[100] bg-brand-black flex flex-col p-6"
+          >
+            <div className="flex justify-between items-center mb-12">
+              <span className="font-display text-2xl font-bold tracking-tighter flex items-center gap-2 leading-none text-brand-white">
+                <div className="w-8 h-8 bg-brand-gold rounded-sm flex items-center justify-center text-brand-black text-xs font-black italic">10</div>
+                CAMISA 10
+              </span>
+              <button onClick={() => setIsMenuOpen(false)} className="text-brand-white hover:text-brand-gold">
+                <XIcon size={24} />
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-6 text-xl font-display font-bold uppercase tracking-widest mt-8">
+              <button onClick={() => { setIsMenuOpen(false); setIsEquipamentosOpen(true); }} className="text-left hover:text-brand-gold transition-colors">Equipamentos</button>
+              <button onClick={() => { setIsMenuOpen(false); setIsRetroOpen(true); }} className="text-left hover:text-brand-gold transition-colors">Retro</button>
+              <button onClick={() => { setIsMenuOpen(false); setIsSelecaoOpen(true); }} className="text-left hover:text-brand-gold transition-colors">Seleção</button>
+              <button onClick={() => { setIsMenuOpen(false); setIsPrimeOpen(true); }} className="text-left hover:text-brand-gold transition-colors">Novidades</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Outlet />
 

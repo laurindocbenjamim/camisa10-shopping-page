@@ -12,8 +12,10 @@ export interface Product {
   thirdImage?: string | null;
   fourthImage?: string | null;
   category: string;
+  subcategory: string;
   description: string;
   sizes: string[];
+  size?: string;
   flag?: string;
   nativeName?: string;
   stockQuantity: number;
@@ -24,7 +26,7 @@ const DEFAULT_IMAGE = "https://placehold.co/400x500/0f0f0f/c5a059?text=Sem+Image
 const mapBackendProduct = (p: any): Product => ({
   id: p.id,
   name: p.name,
-  price: p.base_price,
+  price: p.base_price !== undefined ? p.base_price : p.price || 0,
   promotionalPrice: p.promotional_price,
   status: p.status || 'normal',
   image: p.image_url || DEFAULT_IMAGE,
@@ -32,6 +34,7 @@ const mapBackendProduct = (p: any): Product => ({
   thirdImage: p.third_image_url || null,
   fourthImage: p.fourth_image_url || null,
   category: p.category || p.tags?.[0] || 'Equipamento',
+  subcategory: p.subcategory || '',
   description: p.attributes?.description || p.name,
   sizes: p.attributes?.sizes || ["S", "M", "L", "XL"],
   flag: p.attributes?.flag,
@@ -42,8 +45,9 @@ const mapBackendProduct = (p: any): Product => ({
 const mapBackendCartItem = (item: any) => ({
   ...item,
   product_id: item.product_id || item.productId || item.id,
-  price_at_addition: item.price || item.price_at_addition || 0,
+  price_at_addition: item.price !== undefined ? item.price : item.price_at_addition || 0,
   product_name: item.product_name || 'Produto',
+  size: item.size || undefined,
 });
 
 interface ShopContextType {
@@ -54,8 +58,8 @@ interface ShopContextType {
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
   addToCart: (product: Product) => Promise<void>;
-  removeFromCart: (productId: string) => Promise<void>;
-  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+  removeFromCart: (productId: string, size?: string) => Promise<void>;
+  updateQuantity: (productId: string, quantity: number, size?: string) => Promise<void>;
   cartTotal: number;
   selectedProduct: Product | null;
   setSelectedProduct: (product: Product | null) => void;
@@ -63,6 +67,7 @@ interface ShopContextType {
   setActiveCategory: (category: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  categories: string[];
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -76,6 +81,7 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const [categories, setCategories] = useState<string[]>(['Todos', 'Equipamentos', 'Retro', 'Seleção', 'Novidades', 'Acessórios']);
 
   const categoryMap: Record<string, string> = {
     'Todos': '',
@@ -110,6 +116,15 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
 
         const cartData = await cartApi.getCart();
         setCart((cartData.items || []).map(mapBackendCartItem));
+
+        try {
+          const catRes = await catalogApi.getCategories();
+          if (catRes && typeof catRes === 'object') {
+            setCategories(['Todos', ...Object.keys(catRes)]);
+          }
+        } catch (e) {
+          console.error("Failed to fetch categories", e);
+        }
       } catch (err) {
         console.error("Failed to fetch initial data", err);
       } finally {
@@ -129,16 +144,16 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = async (product: Product) => {
     try {
-      const updatedCart = await cartApi.addItem(product.id, 1);
+      const updatedCart = await cartApi.addItem(product.id, 1, product.size);
       if (updatedCart?.items) {
         setCart(updatedCart.items.map(mapBackendCartItem));
       } else {
         setCart(prev => {
-          const existing = prev.find(i => i.product_id === product.id);
+          const existing = prev.find(i => i.product_id === product.id && i.size === product.size);
           if (existing) {
-            return prev.map(i => i.product_id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
+            return prev.map(i => i.product_id === product.id && i.size === product.size ? { ...i, quantity: i.quantity + 1 } : i);
           }
-          return [...prev, { product_id: product.id, product_name: product.name, quantity: 1, price_at_addition: product.promotionalPrice ?? product.price }];
+          return [...prev, { product_id: product.id, product_name: product.name, quantity: 1, price_at_addition: product.promotionalPrice ?? product.price, size: product.size }];
         });
       }
       setIsCartOpen(true);
@@ -148,22 +163,22 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       setCart(prev => {
-        const existing = prev.find(i => i.product_id === product.id);
+        const existing = prev.find(i => i.product_id === product.id && i.size === product.size);
         if (existing) {
-          return prev.map(i => i.product_id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
+          return prev.map(i => i.product_id === product.id && i.size === product.size ? { ...i, quantity: i.quantity + 1 } : i);
         }
-        return [...prev, { product_id: product.id, product_name: product.name, quantity: 1, price_at_addition: product.promotionalPrice ?? product.price }];
+        return [...prev, { product_id: product.id, product_name: product.name, quantity: 1, price_at_addition: product.promotionalPrice ?? product.price, size: product.size }];
       });
       setIsCartOpen(true);
     }
   };
 
-  const removeFromCart = async (productId: string) => {
+  const removeFromCart = async (productId: string, size?: string) => {
     if (!productId) return;
     const previousCart = [...cart];
-    setCart(prev => prev.filter(i => i.product_id !== productId));
+    setCart(prev => prev.filter(i => !(i.product_id === productId && i.size === size)));
     try {
-      const updatedCart = await cartApi.removeItem(productId);
+      const updatedCart = await cartApi.removeItem(productId, size);
       if (updatedCart?.items) setCart(updatedCart.items.map(mapBackendCartItem));
       else if (updatedCart && Array.isArray(updatedCart)) setCart(updatedCart.map(mapBackendCartItem));
     } catch (err) {
@@ -171,13 +186,13 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateQuantity = async (productId: string, quantity: number) => {
+  const updateQuantity = async (productId: string, quantity: number, size?: string) => {
     if (!productId) return;
-    if (quantity <= 0) return removeFromCart(productId);
+    if (quantity <= 0) return removeFromCart(productId, size);
     const previousCart = [...cart];
-    setCart(prev => prev.map(i => i.product_id === productId ? { ...i, quantity } : i));
+    setCart(prev => prev.map(i => i.product_id === productId && i.size === size ? { ...i, quantity } : i));
     try {
-      const updatedCart = await cartApi.updateItem(productId, quantity);
+      const updatedCart = await cartApi.updateItem(productId, quantity, size);
       if (updatedCart?.items) setCart(updatedCart.items.map(mapBackendCartItem));
       else if (updatedCart && Array.isArray(updatedCart)) setCart(updatedCart.map(mapBackendCartItem));
     } catch (err: any) {
@@ -192,7 +207,8 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
       addToCart, removeFromCart, updateQuantity, cartTotal, 
       selectedProduct, setSelectedProduct,
       activeCategory, setActiveCategory,
-      searchQuery, setSearchQuery
+      searchQuery, setSearchQuery,
+      categories
     }}>
       {children}
     </ShopContext.Provider>

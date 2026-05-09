@@ -40,7 +40,8 @@
 }
 
 .marquee-content {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   animation: marquee 20s linear infinite;
 }
 
