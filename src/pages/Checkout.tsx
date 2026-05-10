@@ -20,7 +20,6 @@ export default function Checkout() {
 
   const currentStep = step || 'checkout';
 
-  if (checkoutStep === 'home') return null;
 
   const renderStep = () => {
     switch (currentStep) {
@@ -64,7 +63,7 @@ export default function Checkout() {
                                   </div>
                                   <div>
                                     <h3 className="text-xs font-bold uppercase tracking-widest mb-1 text-brand-white">{item.product_name}</h3>
-                                    <p className="text-[10px] text-brand-white/40 uppercase">Tamanho: Único</p>
+                                    <p className="text-[10px] text-brand-white/40 uppercase">Tamanho: {item.size || 'Único'}</p>
                                   </div>
                                 </div>
                               </td>
@@ -72,7 +71,7 @@ export default function Checkout() {
                                 <div className="flex items-center justify-center gap-4">
                                   <button
                                     type="button"
-                                    onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
+                                    onClick={() => updateQuantity(item.product_id, item.quantity - 1, item.size)}
                                     className="w-8 h-8 rounded-full border border-brand-white/10 flex items-center justify-center hover:border-brand-gold hover:text-brand-gold transition-colors cursor-pointer text-brand-white"
                                   >
                                     <Minus size={12} />
@@ -80,7 +79,7 @@ export default function Checkout() {
                                   <span className="font-display font-bold text-sm min-w-[20px] text-center text-brand-white">{item.quantity}</span>
                                   <button
                                     type="button"
-                                    onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
+                                    onClick={() => updateQuantity(item.product_id, item.quantity + 1, item.size)}
                                     className="w-8 h-8 rounded-full border border-brand-white/10 flex items-center justify-center hover:border-brand-gold hover:text-brand-gold transition-colors cursor-pointer text-brand-white"
                                   >
                                     <Plus size={12} />
@@ -91,7 +90,7 @@ export default function Checkout() {
                               <td className="px-6 py-8">
                                 <button
                                   type="button"
-                                  onClick={() => removeFromCart(item.product_id)}
+                                  onClick={() => removeFromCart(item.product_id, item.size)}
                                   className="p-3 text-brand-white/20 hover:text-brand-gold hover:bg-brand-gold/10 transition-all rounded-full cursor-pointer"
                                 >
                                   <Trash2 size={18} />

@@ -170,7 +170,7 @@ export default function Home() {
                                 }}
                                 className="w-full bg-brand-white text-brand-black py-3 font-bold uppercase text-[10px] tracking-widest hover:bg-brand-gold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                {product.stockQuantity <= 0 ? 'Esgotado' : 'Ver Detalhes'}
+                                {product.stockQuantity <= 0 ? 'Esgotado' : 'Adicionar ao Carrinho'}
                               </button>
                             </div>
                             <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -255,7 +255,7 @@ export default function Home() {
                         }}
                         className="w-full bg-brand-white text-brand-black py-3 font-bold uppercase text-[10px] tracking-widest hover:bg-brand-gold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {product.stockQuantity <= 0 ? 'Esgotado' : 'Ver Detalhes'}
+                        {product.stockQuantity <= 0 ? 'Esgotado' : 'Adicionar ao Carrinho'}
                       </button>
                     </div>
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -369,7 +369,7 @@ export default function Home() {
                         <p className="text-brand-gold font-display font-bold text-lg">€{product.price.toFixed(2)}</p>
                       )}
                       {product.stockQuantity <= 0 && <p className="text-red-600 text-[9px] font-bold uppercase tracking-widest mt-1">Stock esgotado</p>}
-                      <button className="mt-4 text-[9px] font-black uppercase tracking-widest text-brand-white/40 group-hover:text-brand-gold transition-colors text-left">Ver Detalhes</button>
+                      <button className="mt-4 text-[9px] font-black uppercase tracking-widest text-brand-white/40 group-hover:text-brand-gold transition-colors text-left">Adicionar ao Carrinho</button>
                     </div>
                   </div>
                 ))}

@@ -37,7 +37,7 @@ const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined
 export const CheckoutProvider = ({ children }: { children: ReactNode }) => {
   const { cart, cartTotal, setCart } = useShop();
   const navigate = useNavigate();
-  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>('home');
+  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>('checkout');
   const [shippingData, setShippingData] = useState({
     name: '',
     email: '',

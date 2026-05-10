@@ -65,9 +65,12 @@ interface ShopContextType {
   setSelectedProduct: (product: Product | null) => void;
   activeCategory: string;
   setActiveCategory: (category: string) => void;
+  activeSubcategory: string;
+  setActiveSubcategory: (subcategory: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   categories: string[];
+  categoriesMap: Record<string, string[]>;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -81,7 +84,9 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const [activeSubcategory, setActiveSubcategory] = useState('');
   const [categories, setCategories] = useState<string[]>(['Todos', 'Equipamentos', 'Retro', 'Seleção', 'Novidades', 'Acessórios']);
+  const [categoriesMap, setCategoriesMap] = useState<Record<string, string[]>>({});
 
   const categoryMap: Record<string, string> = {
     'Todos': '',
@@ -98,6 +103,7 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
       const params: any = { limit: 100 };
       if (searchQuery) params.name = searchQuery;
       if (categoryParam && categoryParam !== 'Todos') params.category = categoryParam;
+      if (activeSubcategory) params.subcategory = activeSubcategory;
       
       const productData = await catalogApi.getProducts(params);
       setProducts(productData.items.map(mapBackendProduct));
@@ -121,6 +127,7 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
           const catRes = await catalogApi.getCategories();
           if (catRes && typeof catRes === 'object') {
             setCategories(['Todos', ...Object.keys(catRes)]);
+            setCategoriesMap(catRes);
           }
         } catch (e) {
           console.error("Failed to fetch categories", e);
@@ -136,40 +143,59 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     fetchProducts();
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery, activeCategory, activeSubcategory]);
 
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => total + (item.price_at_addition * item.quantity), 0);
   }, [cart]);
 
   const addToCart = async (product: Product) => {
+    // 1. Optimistic Update: Add to local state immediately for better UX
+    const itemToAdd = {
+      product_id: product.id,
+      product_name: product.name,
+      quantity: 1,
+      price_at_addition: product.promotionalPrice ?? product.price ?? 0,
+      size: product.size
+    };
+
+    setCart(prev => {
+      const existing = prev.find(i => i.product_id === itemToAdd.product_id && i.size === itemToAdd.size);
+      if (existing) {
+        return prev.map(i => i.product_id === itemToAdd.product_id && i.size === itemToAdd.size 
+          ? { ...i, quantity: i.quantity + 1 } 
+          : i
+        );
+      }
+      return [...prev, itemToAdd];
+    });
+
+    // Open sidebar immediately
+    setIsCartOpen(true);
+
     try {
+      // 2. Sync with backend
       const updatedCart = await cartApi.addItem(product.id, 1, product.size);
       if (updatedCart?.items) {
         setCart(updatedCart.items.map(mapBackendCartItem));
-      } else {
-        setCart(prev => {
-          const existing = prev.find(i => i.product_id === product.id && i.size === product.size);
-          if (existing) {
-            return prev.map(i => i.product_id === product.id && i.size === product.size ? { ...i, quantity: i.quantity + 1 } : i);
-          }
-          return [...prev, { product_id: product.id, product_name: product.name, quantity: 1, price_at_addition: product.promotionalPrice ?? product.price, size: product.size }];
-        });
       }
-      setIsCartOpen(true);
     } catch (err: any) {
+      console.error("Failed to sync cart with backend", err);
       if (err.message?.includes("Insufficient stock")) {
         alert("Desculpe, este produto não tem stock suficiente.");
-        return;
+        // Revert local change if stock is insufficient
+        setCart(prev => {
+          const existing = prev.find(i => i.product_id === itemToAdd.product_id && i.size === itemToAdd.size);
+          if (existing && existing.quantity > 1) {
+            return prev.map(i => i.product_id === itemToAdd.product_id && i.size === itemToAdd.size 
+              ? { ...i, quantity: i.quantity - 1 } 
+              : i
+            );
+          }
+          return prev.filter(i => !(i.product_id === itemToAdd.product_id && i.size === itemToAdd.size));
+        });
       }
-      setCart(prev => {
-        const existing = prev.find(i => i.product_id === product.id && i.size === product.size);
-        if (existing) {
-          return prev.map(i => i.product_id === product.id && i.size === product.size ? { ...i, quantity: i.quantity + 1 } : i);
-        }
-        return [...prev, { product_id: product.id, product_name: product.name, quantity: 1, price_at_addition: product.promotionalPrice ?? product.price, size: product.size }];
-      });
-      setIsCartOpen(true);
+      // For other errors, we keep the optimistic local state so the user can at least see it in their session
     }
   };
 
@@ -207,8 +233,9 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
       addToCart, removeFromCart, updateQuantity, cartTotal, 
       selectedProduct, setSelectedProduct,
       activeCategory, setActiveCategory,
+      activeSubcategory, setActiveSubcategory,
       searchQuery, setSearchQuery,
-      categories
+      categories, categoriesMap
     }}>
       {children}
     </ShopContext.Provider>
