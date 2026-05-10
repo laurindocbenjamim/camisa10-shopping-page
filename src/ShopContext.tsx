@@ -19,6 +19,7 @@ export interface Product {
   flag?: string;
   nativeName?: string;
   stockQuantity: number;
+  slug: string;
 }
 
 const DEFAULT_IMAGE = "https://placehold.co/400x500/0f0f0f/c5a059?text=Sem+Imagem";
@@ -35,7 +36,7 @@ const mapBackendProduct = (p: any): Product => {
   const backendCategory = p.category || p.tags?.[0] || 'Equipamento';
   return {
     id: p.id,
-    name: p.name,
+    name: p.name || '',
     price: p.base_price !== undefined ? p.base_price : p.price || 0,
     promotionalPrice: p.promotional_price,
     status: p.status || 'normal',
@@ -49,7 +50,8 @@ const mapBackendProduct = (p: any): Product => {
     sizes: p.attributes?.sizes || ["S", "M", "L", "XL"],
     flag: p.attributes?.flag,
     nativeName: p.attributes?.nativeName,
-    stockQuantity: p.stock_quantity || 0
+    stockQuantity: p.stock_quantity || 0,
+    slug: p.slug || ''
   };
 };
 
