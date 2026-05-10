@@ -424,7 +424,14 @@ function AppContent() {
                 <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-6 mt-auto pt-6 md:pt-8 border-t border-brand-white/5">
                   <div className="text-center sm:text-left">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-brand-white/30 block mb-1">Preço</span>
-                    <span className="font-display text-3xl md:text-5xl font-bold text-brand-gold">€{selectedProduct.price.toFixed(2)}</span>
+                    {selectedProduct.status === 'promotion' && selectedProduct.promotionalPrice ? (
+                      <div className="flex flex-col items-center sm:items-start">
+                        <span className="text-sm line-through text-brand-white/40 mb-1">€{selectedProduct.price.toFixed(2)}</span>
+                        <span className="font-display text-3xl md:text-5xl font-bold text-brand-gold">€{selectedProduct.promotionalPrice.toFixed(2)}</span>
+                      </div>
+                    ) : (
+                      <span className="font-display text-3xl md:text-5xl font-bold text-brand-gold">€{selectedProduct.price.toFixed(2)}</span>
+                    )}
                   </div>
                   <button
                     disabled={!selectedSize || selectedProduct.stockQuantity <= 0}

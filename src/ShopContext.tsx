@@ -115,22 +115,19 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initData = async () => {
       try {
-        await fetchProducts();
+        const [productData, mostSoldData, cartData, categoriesData] = await Promise.all([
+          catalogApi.getProducts({ limit: 100 }),
+          catalogApi.getMostSold(),
+          cartApi.getCart(),
+          catalogApi.getCategories()
+        ]);
 
-        const mostSoldData = await catalogApi.getMostSold();
+        setProducts(productData.items.map(mapBackendProduct));
         setMostSold(Array.isArray(mostSoldData) ? mostSoldData.map(mapBackendProduct) : []);
-
-        const cartData = await cartApi.getCart();
         setCart((cartData.items || []).map(mapBackendCartItem));
-
-        try {
-          const catRes = await catalogApi.getCategories();
-          if (catRes && typeof catRes === 'object') {
-            setCategories(['Todos', ...Object.keys(catRes)]);
-            setCategoriesMap(catRes);
-          }
-        } catch (e) {
-          console.error("Failed to fetch categories", e);
+        if (categoriesData && typeof categoriesData === 'object') {
+          setCategories(['Todos', ...Object.keys(categoriesData)]);
+          setCategoriesMap(categoriesData);
         }
       } catch (err) {
         console.error("Failed to fetch initial data", err);
