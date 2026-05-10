@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App.tsx'
 import Home from './pages/Home.tsx'
 import Checkout from './pages/Checkout.tsx'
+import Cancel from './pages/Cancel.tsx'
+import Success from './pages/Success.tsx'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(
@@ -14,6 +16,8 @@ createRoot(document.getElementById('root')!).render(
           <Route index element={<Home />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="checkout/:step" element={<Checkout />} />
+          <Route path="cancel" element={<Cancel />} />
+          <Route path="success" element={<Success />} />
         </Route>
       </Routes>
     </BrowserRouter>

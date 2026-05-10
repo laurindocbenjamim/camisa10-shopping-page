@@ -82,6 +82,7 @@ interface ShopContextType {
   setSearchQuery: (query: string) => void;
   categories: string[];
   categoriesMap: Record<string, string[]>;
+  clearCart: () => void;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -137,8 +138,13 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
         setMostSold(Array.isArray(mostSoldData) ? mostSoldData.map(mapBackendProduct) : []);
         setCart((cartData.items || []).map(mapBackendCartItem));
         if (categoriesData && typeof categoriesData === 'object') {
-          setCategories(['Todos', ...Object.keys(categoriesData)]);
-          setCategoriesMap(categoriesData);
+          const normalizedMap: Record<string, string[]> = {};
+          Object.entries(categoriesData as Record<string, string[]>).forEach(([cat, subs]) => {
+            const displayName = reverseCategoryMap[cat] || cat;
+            normalizedMap[displayName] = subs;
+          });
+          setCategories(['Todos', ...Object.keys(normalizedMap)]);
+          setCategoriesMap(normalizedMap);
         }
       } catch (err) {
         console.error("Failed to fetch initial data", err);
@@ -156,6 +162,10 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => total + (item.price_at_addition * item.quantity), 0);
   }, [cart]);
+
+  const clearCart = () => {
+    setCart([]);
+  };
 
   const addToCart = async (product: Product) => {
     // 1. Optimistic Update: Add to local state immediately for better UX
@@ -243,7 +253,8 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
       activeCategory, setActiveCategory,
       activeSubcategory, setActiveSubcategory,
       searchQuery, setSearchQuery,
-      categories, categoriesMap
+      categories, categoriesMap,
+      clearCart
     }}>
       {children}
     </ShopContext.Provider>

@@ -22,6 +22,7 @@ export default function Home() {
     const searchLower = searchQuery.toLowerCase().trim();
     const matchesSearch = searchLower === '' || 
       p.name.toLowerCase().includes(searchLower) ||
+      p.slug.toLowerCase().includes(searchLower) ||
       p.category.toLowerCase().includes(searchLower) ||
       (p.subcategory && p.subcategory.toLowerCase().includes(searchLower));
     
