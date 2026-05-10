@@ -84,7 +84,7 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
-  const [activeSubcategory, setActiveSubcategory] = useState('');
+  const [activeSubcategory, setActiveSubcategory] = useState('Todos');
   const [categories, setCategories] = useState<string[]>(['Todos', 'Equipamentos', 'Retro', 'Seleção', 'Novidades', 'Acessórios']);
   const [categoriesMap, setCategoriesMap] = useState<Record<string, string[]>>({});
 
