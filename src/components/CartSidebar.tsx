@@ -52,7 +52,7 @@ export default function CartSidebar({ onCheckout }: CartSidebarProps) {
                 cart.map((item, idx) => {
                   const productInfo = products.find(p => p.id === item.product_id);
                   return (
-                    <div key={item.product_id || idx} className="flex gap-4 group p-2 border border-brand-white/5 bg-brand-white/5">
+                    <div key={`${item.product_id}-${item.size || ''}-${idx}`} className="flex gap-4 group p-2 border border-brand-white/5 bg-brand-white/5">
                       <div className="w-20 h-24 bg-[#0f0f0f] overflow-hidden shrink-0">
                         {productInfo?.image && (
                           <img src={productInfo.image} alt={item.product_name} className="w-full h-full object-cover" />
@@ -63,24 +63,25 @@ export default function CartSidebar({ onCheckout }: CartSidebarProps) {
                           <h3 className="text-[10px] font-bold uppercase tracking-wider truncate text-brand-white">{item.product_name}</h3>
                           <button
                             type="button"
-                            onClick={() => removeFromCart(item.product_id)}
+                            onClick={() => removeFromCart(item.product_id, item.size)}
                             className="text-brand-white/30 hover:text-brand-gold transition-colors shrink-0"
                           >
                             <X size={16} />
                           </button>
                         </div>
-                        <div className="flex justify-between items-center mt-2">
+                        {item.size && <p className="text-[10px] text-brand-white/50 mb-1">Tamanho: {item.size}</p>}
+                        <div className="flex justify-between items-center mt-1">
                           <div className="flex items-center gap-2 border border-brand-white/10 px-2 py-1">
                             <button
                               type="button"
-                              onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.product_id, item.quantity - 1, item.size)}
                               className="w-6 h-6 flex items-center justify-center text-[12px] font-bold hover:text-brand-gold transition-colors cursor-pointer select-none text-brand-white"
                               aria-label="Diminuir quantidade"
                             >−</button>
                             <span className="text-[10px] font-bold min-w-[20px] text-center text-brand-white">{item.quantity}</span>
                             <button
                               type="button"
-                              onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.product_id, item.quantity + 1, item.size)}
                               className="w-6 h-6 flex items-center justify-center text-[12px] font-bold hover:text-brand-gold transition-colors cursor-pointer select-none text-brand-white"
                               aria-label="Aumentar quantidade"
                             >+</button>

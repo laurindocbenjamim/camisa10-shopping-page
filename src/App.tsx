@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import Checkout from './pages/Checkout';
 import CookieConsentForm from './components/CookieConsentForm';
 import CartSidebar from './components/CartSidebar';
-import { useShop, ShopProvider } from './ShopContext';
+import { useShop, ShopProvider, Product } from './ShopContext';
 import { useCheckout, CheckoutProvider } from './CheckoutContext';
 import FAQModal from './components/FAQModal';
 import ShippingPolicyModal from './components/ShippingPolicyModal';
@@ -16,23 +16,6 @@ import { History, Globe } from 'lucide-react';
 
 const DEFAULT_IMAGE = "https://placehold.co/400x500/0f0f0f/c5a059?text=Sem+Imagem";
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  promotionalPrice?: number;
-  status: string;
-  image: string | null;
-  hoverImage?: string | null;
-  thirdImage?: string | null;
-  fourthImage?: string | null;
-  category: string;
-  description: string;
-  sizes: string[];
-  flag?: string;
-  nativeName?: string;
-  stockQuantity: number;
-}
 
 export default function App() {
   return (
@@ -49,7 +32,9 @@ export default function App() {
 function AppContent() {
   const { 
     products, cart, isLoading, isCartOpen, setIsCartOpen, 
-    searchQuery, setSearchQuery, activeCategory, setActiveCategory, addToCart
+    searchQuery, setSearchQuery, activeCategory, setActiveCategory,
+    activeSubcategory, setActiveSubcategory, addToCart,
+    categoriesMap, selectedProduct, setSelectedProduct
   } = useShop();
   
   const { checkoutStep, setCheckoutStep } = useCheckout();
@@ -57,7 +42,6 @@ function AppContent() {
   const location = useLocation();
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [isPrimeOpen, setIsPrimeOpen] = useState(false);
@@ -79,9 +63,16 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    setSelectedSize(null);
     if (selectedProduct) {
       setActiveImage(selectedProduct.image);
+      // Auto-select first size if available to make adding to cart faster
+      if (selectedProduct.sizes && selectedProduct.sizes.length > 0) {
+        setSelectedSize(selectedProduct.sizes[0]);
+      } else {
+        setSelectedSize(null);
+      }
+    } else {
+      setSelectedSize(null);
     }
   }, [selectedProduct]);
 
@@ -98,11 +89,14 @@ function AppContent() {
       {location.pathname === '/' && (
         <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-brand-black/90 backdrop-blur-md border-b border-brand-white/10 py-4' : 'bg-transparent py-6'}`}>
           <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-            <div className="flex items-center gap-8">
-              <button onClick={() => setIsMenuOpen(true)} className="hover:text-brand-gold transition-colors cursor-pointer">
+            <div className="flex items-center gap-4 md:gap-8">
+              <button onClick={() => setIsMenuOpen(true)} className="md:hidden hover:text-brand-gold transition-colors cursor-pointer">
                 <Menu size={24} />
               </button>
-              <div className="flex flex-col cursor-pointer" onClick={() => navigate('/')}>
+              <div className="flex flex-col cursor-pointer" onClick={() => {
+                navigate('/');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}>
                 <span className="font-display text-2xl font-bold tracking-tighter flex items-center gap-2 leading-none text-brand-white">
                   <div className="w-8 h-8 bg-brand-gold rounded-sm flex items-center justify-center text-brand-black text-xs font-black italic">10</div>
                   CAMISA 10
@@ -169,6 +163,80 @@ function AppContent() {
           </div>
         </nav>
       )}
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: '-100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '-100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[100] bg-brand-black flex flex-col p-6"
+          >
+            <div className="flex justify-between items-center mb-12">
+              <span className="font-display text-2xl font-bold tracking-tighter flex items-center gap-2 leading-none text-brand-white cursor-pointer" onClick={() => {
+                setIsMenuOpen(false);
+                navigate('/');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}>
+                <div className="w-8 h-8 bg-brand-gold rounded-sm flex items-center justify-center text-brand-black text-xs font-black italic">10</div>
+                CAMISA 10
+              </span>
+              <button onClick={() => setIsMenuOpen(false)} className="text-brand-white hover:text-brand-gold">
+                <XIcon size={24} />
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-6 text-xl font-display font-bold uppercase tracking-widest mt-8">
+              {Object.entries(categoriesMap).length > 0 ? (
+                Object.entries(categoriesMap).map(([cat, subcats]) => (
+                  <div key={cat} className="flex flex-col gap-2">
+                    <button 
+                      onClick={() => { 
+                        setIsMenuOpen(false); 
+                        setActiveCategory(cat);
+                        setActiveSubcategory('');
+                        if (location.pathname !== '/') navigate('/');
+                        setTimeout(() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                      }} 
+                      className="text-left hover:text-brand-gold transition-colors"
+                    >
+                      {cat}
+                    </button>
+                    {subcats.length > 0 && (
+                      <div className="flex flex-col gap-2 pl-4 mt-2 text-sm text-brand-white/60">
+                        {subcats.map(sub => (
+                          <button 
+                            key={sub}
+                            onClick={() => {
+                               setIsMenuOpen(false);
+                               setActiveCategory(cat);
+                               setActiveSubcategory(sub);
+                               if (location.pathname !== '/') navigate('/');
+                               setTimeout(() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                            }}
+                            className="text-left hover:text-brand-gold transition-colors"
+                          >
+                            {sub}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <>
+                  <button onClick={() => { setIsMenuOpen(false); setIsEquipamentosOpen(true); }} className="text-left hover:text-brand-gold transition-colors">Equipamentos</button>
+                  <button onClick={() => { setIsMenuOpen(false); setIsRetroOpen(true); }} className="text-left hover:text-brand-gold transition-colors">Retro</button>
+                  <button onClick={() => { setIsMenuOpen(false); setIsSelecaoOpen(true); }} className="text-left hover:text-brand-gold transition-colors">Seleção</button>
+                  <button onClick={() => { setIsMenuOpen(false); setIsPrimeOpen(true); }} className="text-left hover:text-brand-gold transition-colors">Novidades</button>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Outlet />
 

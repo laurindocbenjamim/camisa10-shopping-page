@@ -54,22 +54,23 @@ export const catalogApi = {
     apiRequest("/products", { params }),
   getProduct: (id: string) => apiRequest(`/products/${id}`),
   getMostSold: () => apiRequest("/products/most-sold"),
+  getCategories: () => apiRequest("/products/categories"),
 };
 
 export const cartApi = {
   getCart: () => apiRequest("/cart"),
-  addItem: (productId: string, quantity: number) =>
+  addItem: (productId: string, quantity: number, size?: string) =>
     apiRequest("/cart/items", {
       method: "POST",
-      data: { product_id: productId, quantity },
+      data: { product_id: productId, quantity, size },
     }),
-  updateItem: (productId: string, quantity: number) =>
+  updateItem: (productId: string, quantity: number, size?: string) =>
     apiRequest(`/cart/items/${productId}`, {
       method: "PUT",
-      data: { quantity },
+      data: { quantity, size },
     }),
-  removeItem: (productId: string) =>
-    apiRequest(`/cart/items/${productId}`, { method: "DELETE" }),
+  removeItem: (productId: string, size?: string) =>
+    apiRequest(`/cart/items/${productId}${size ? `?size=${size}` : ''}`, { method: "DELETE" }),
   clearCart: () => apiRequest("/cart", { method: "DELETE" }),
 };
 
