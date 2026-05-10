@@ -23,24 +23,35 @@ export interface Product {
 
 const DEFAULT_IMAGE = "https://placehold.co/400x500/0f0f0f/c5a059?text=Sem+Imagem";
 
-const mapBackendProduct = (p: any): Product => ({
-  id: p.id,
-  name: p.name,
-  price: p.base_price !== undefined ? p.base_price : p.price || 0,
-  promotionalPrice: p.promotional_price,
-  status: p.status || 'normal',
-  image: p.image_url || DEFAULT_IMAGE,
-  hoverImage: p.hover_image_url || null,
-  thirdImage: p.third_image_url || null,
-  fourthImage: p.fourth_image_url || null,
-  category: p.category || p.tags?.[0] || 'Equipamento',
-  subcategory: p.subcategory || '',
-  description: p.attributes?.description || p.name,
-  sizes: p.attributes?.sizes || ["S", "M", "L", "XL"],
-  flag: p.attributes?.flag,
-  nativeName: p.attributes?.nativeName,
-  stockQuantity: p.stock_quantity || 0
-});
+const reverseCategoryMap: Record<string, string> = {
+  'Equipamento': 'Equipamentos',
+  'Retro': 'Retro',
+  'Selecao': 'Seleção',
+  'Novidades': 'Novidades',
+  'Acessorios': 'Acessórios'
+};
+
+const mapBackendProduct = (p: any): Product => {
+  const backendCategory = p.category || p.tags?.[0] || 'Equipamento';
+  return {
+    id: p.id,
+    name: p.name,
+    price: p.base_price !== undefined ? p.base_price : p.price || 0,
+    promotionalPrice: p.promotional_price,
+    status: p.status || 'normal',
+    image: p.image_url || DEFAULT_IMAGE,
+    hoverImage: p.hover_image_url || null,
+    thirdImage: p.third_image_url || null,
+    fourthImage: p.fourth_image_url || null,
+    category: reverseCategoryMap[backendCategory] || backendCategory,
+    subcategory: p.subcategory || '',
+    description: p.attributes?.description || p.name,
+    sizes: p.attributes?.sizes || ["S", "M", "L", "XL"],
+    flag: p.attributes?.flag,
+    nativeName: p.attributes?.nativeName,
+    stockQuantity: p.stock_quantity || 0
+  };
+};
 
 const mapBackendCartItem = (item: any) => ({
   ...item,
@@ -103,7 +114,7 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
       const params: any = { limit: 100 };
       if (searchQuery) params.name = searchQuery;
       if (categoryParam && categoryParam !== 'Todos') params.category = categoryParam;
-      if (activeSubcategory) params.subcategory = activeSubcategory;
+      if (activeSubcategory && activeSubcategory !== 'Todos') params.subcategory = activeSubcategory;
       
       const productData = await catalogApi.getProducts(params);
       setProducts(productData.items.map(mapBackendProduct));
