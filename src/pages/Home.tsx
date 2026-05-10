@@ -12,10 +12,24 @@ export default function Home() {
     setActiveCategory, 
     setSelectedProduct,
     addToCart,
-    categories
+    categoriesMap,
+    categories,
+    activeSubcategory,
+    setActiveSubcategory
   } = useShop();
 
-  const filteredProducts = products;
+  const filteredProducts = products.filter(p => {
+    const searchLower = searchQuery.toLowerCase().trim();
+    const matchesSearch = searchLower === '' || 
+      p.name.toLowerCase().includes(searchLower) ||
+      p.category.toLowerCase().includes(searchLower) ||
+      (p.subcategory && p.subcategory.toLowerCase().includes(searchLower));
+    
+    const matchesCategory = activeCategory === 'Todos' || p.category === activeCategory;
+    const matchesSubcategory = activeSubcategory === 'Todos' || p.subcategory === activeSubcategory;
+    
+    return matchesSearch && matchesCategory && matchesSubcategory;
+  });
 
   return (
     <>
@@ -113,7 +127,27 @@ export default function Home() {
           </div>
         </div>
 
-        {activeCategory === 'Todos' && filteredProducts.length > 0 ? (
+        {activeCategory !== 'Todos' && categoriesMap[activeCategory] && categoriesMap[activeCategory].length > 0 && (
+          <div className="flex gap-4 overflow-x-auto pb-8 mb-8 border-b border-brand-white/5">
+            <button
+              onClick={() => setActiveSubcategory('Todos')}
+              className={`text-[9px] font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-all ${activeSubcategory === 'Todos' ? 'bg-brand-gold border-brand-gold text-brand-black' : 'border-brand-white/10 text-brand-white/50 hover:border-brand-gold'}`}
+            >
+              Todos
+            </button>
+            {categoriesMap[activeCategory].map(sub => (
+              <button
+                key={sub}
+                onClick={() => setActiveSubcategory(sub)}
+                className={`text-[9px] font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-all ${activeSubcategory === sub ? 'bg-brand-gold border-brand-gold text-brand-black' : 'border-brand-white/10 text-brand-white/50 hover:border-brand-gold'}`}
+              >
+                {sub}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {activeCategory === 'Todos' && searchQuery.trim() === '' ? (
           // Group by Category and Subcategory
           Array.from(new Set(filteredProducts.map(p => p.category))).map(category => (
             <div key={category} className="mb-16">

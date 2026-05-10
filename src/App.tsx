@@ -196,7 +196,7 @@ function AppContent() {
                       onClick={() => { 
                         setIsMenuOpen(false); 
                         setActiveCategory(cat);
-                        setActiveSubcategory('');
+                        setActiveSubcategory('Todos');
                         if (location.pathname !== '/') navigate('/');
                         setTimeout(() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }), 100);
                       }} 
@@ -204,8 +204,8 @@ function AppContent() {
                     >
                       {cat}
                     </button>
-                    {subcats.length > 0 && (
-                      <div className="flex flex-col gap-2 pl-4 mt-2 text-sm text-brand-white/60">
+                    {subcats && subcats.length > 0 && (
+                      <div className="flex flex-col gap-3 pl-6 mt-4 text-[11px] text-brand-white/40 font-bold tracking-widest uppercase border-l border-brand-white/10">
                         {subcats.map(sub => (
                           <button 
                             key={sub}
@@ -216,7 +216,7 @@ function AppContent() {
                                if (location.pathname !== '/') navigate('/');
                                setTimeout(() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }), 100);
                             }}
-                            className="text-left hover:text-brand-gold transition-colors"
+                            className={`text-left transition-all hover:text-brand-gold ${activeSubcategory === sub ? 'text-brand-gold' : ''}`}
                           >
                             {sub}
                           </button>
