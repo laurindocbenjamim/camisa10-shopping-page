@@ -117,9 +117,10 @@ export default function Home() {
                 key={cat}
                 onClick={() => {
                   setActiveCategory(cat);
+                  setActiveSubcategory('Todos');
                   document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className={`text-[10px] font-bold uppercase tracking-[0.2em] whitespace-nowrap transition-colors border-b-2 pb-1 ${activeCategory === cat ? 'text-brand-gold border-brand-gold' : 'text-brand-white/50 border-transparent hover:text-brand-gold'
+                className={`text-sm font-bold uppercase tracking-[0.2em] whitespace-nowrap transition-colors border-b-2 pb-1 ${activeCategory === cat ? 'text-brand-gold border-brand-gold' : 'text-brand-white/50 border-transparent hover:text-brand-gold'
                   }`}
               >
                 {cat}
@@ -132,7 +133,7 @@ export default function Home() {
           <div className="flex gap-4 overflow-x-auto pb-8 mb-8 border-b border-brand-white/5">
             <button
               onClick={() => setActiveSubcategory('Todos')}
-              className={`text-[9px] font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-all ${activeSubcategory === 'Todos' ? 'bg-brand-gold border-brand-gold text-brand-black' : 'border-brand-white/10 text-brand-white/50 hover:border-brand-gold'}`}
+              className={`text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-all ${activeSubcategory === 'Todos' ? 'bg-brand-gold border-brand-gold text-brand-black' : 'border-brand-white/10 text-brand-white/50 hover:border-brand-gold'}`}
             >
               Todos
             </button>
@@ -140,7 +141,7 @@ export default function Home() {
               <button
                 key={sub}
                 onClick={() => setActiveSubcategory(sub)}
-                className={`text-[9px] font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-all ${activeSubcategory === sub ? 'bg-brand-gold border-brand-gold text-brand-black' : 'border-brand-white/10 text-brand-white/50 hover:border-brand-gold'}`}
+                className={`text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border transition-all ${activeSubcategory === sub ? 'bg-brand-gold border-brand-gold text-brand-black' : 'border-brand-white/10 text-brand-white/50 hover:border-brand-gold'}`}
               >
                 {sub}
               </button>

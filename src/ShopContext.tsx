@@ -32,6 +32,13 @@ const reverseCategoryMap: Record<string, string> = {
   'Acessorios': 'Acessórios'
 };
 
+const normalizeSubcategory = (s: string | null | undefined): string => {
+  if (!s) return '';
+  const trimmed = s.trim();
+  if (!trimmed) return '';
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+};
+
 const mapBackendProduct = (p: any): Product => {
   const backendCategory = p.category || p.tags?.[0] || 'Equipamento';
   return {
@@ -45,7 +52,7 @@ const mapBackendProduct = (p: any): Product => {
     thirdImage: p.third_image_url || null,
     fourthImage: p.fourth_image_url || null,
     category: reverseCategoryMap[backendCategory] || backendCategory,
-    subcategory: p.subcategory || '',
+    subcategory: normalizeSubcategory(p.subcategory),
     description: p.attributes?.description || p.name,
     sizes: p.attributes?.sizes || ["S", "M", "L", "XL"],
     flag: p.attributes?.flag,
@@ -143,9 +150,15 @@ export const ShopProvider = ({ children }: { children: ReactNode }) => {
           const normalizedMap: Record<string, string[]> = {};
           Object.entries(categoriesData as Record<string, string[]>).forEach(([cat, subs]) => {
             const displayName = reverseCategoryMap[cat] || cat;
-            normalizedMap[displayName] = subs;
+            // Ensure unique subcategories by normalizing them
+            const uniqueSubs = Array.from(new Set(
+              subs.map(normalizeSubcategory).filter(s => s !== '')
+            ));
+            normalizedMap[displayName] = uniqueSubs;
           });
-          setCategories(['Todos', ...Object.keys(normalizedMap)]);
+          // Ensure unique category names
+          const uniqueCategories = Array.from(new Set(Object.keys(normalizedMap)));
+          setCategories(['Todos', ...uniqueCategories]);
           setCategoriesMap(normalizedMap);
         }
       } catch (err) {
