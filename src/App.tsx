@@ -34,7 +34,7 @@ function AppContent() {
     products, cart, isLoading, isCartOpen, setIsCartOpen, 
     searchQuery, setSearchQuery, activeCategory, setActiveCategory,
     activeSubcategory, setActiveSubcategory, addToCart,
-    categoriesMap, selectedProduct, setSelectedProduct
+    categoriesMap, categories, selectedProduct, setSelectedProduct
   } = useShop();
   
   const { checkoutStep, setCheckoutStep } = useCheckout();
@@ -105,11 +105,51 @@ function AppContent() {
               </div>
             </div>
 
-            <div className="hidden md:flex gap-8 text-sm font-medium uppercase tracking-widest">
-              <button onClick={() => setIsEquipamentosOpen(true)} className="hover:text-brand-gold transition-colors uppercase tracking-widest cursor-pointer">Equipamentos</button>
-              <button onClick={() => setIsRetroOpen(true)} className="hover:text-brand-gold transition-colors uppercase tracking-widest cursor-pointer">Retro</button>
-              <button onClick={() => setIsSelecaoOpen(true)} className="hover:text-brand-gold transition-colors uppercase tracking-widest cursor-pointer">Seleção</button>
-              <button onClick={() => setIsPrimeOpen(true)} className="hover:text-brand-gold transition-colors uppercase tracking-widest cursor-pointer">Novidades</button>
+            <div className="hidden md:flex gap-8 text-sm font-medium uppercase tracking-[0.2em]">
+              {categories.filter(c => c !== 'Todos').map(cat => (
+                <div key={cat} className="relative group py-2">
+                  <button
+                    onClick={() => {
+                      setActiveCategory(cat);
+                      setActiveSubcategory('Todos');
+                      if (location.pathname !== '/') navigate('/');
+                      setTimeout(() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                    }}
+                    className={`hover:text-brand-gold transition-all duration-300 cursor-pointer flex items-center gap-1 ${activeCategory === cat ? 'text-brand-gold' : 'text-brand-white/70'}`}
+                  >
+                    {cat}
+                    {categoriesMap[cat] && categoriesMap[cat].length > 0 && (
+                      <motion.span 
+                        animate={{ rotate: 0 }}
+                        className="opacity-20 group-hover:opacity-100 transition-opacity"
+                      >
+                        <ChevronRight size={10} className="rotate-90" />
+                      </motion.span>
+                    )}
+                  </button>
+                  
+                  {categoriesMap[cat] && categoriesMap[cat].length > 0 && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                      <div className="bg-brand-black/95 backdrop-blur-xl border border-brand-white/10 p-2 min-w-[200px] shadow-2xl">
+                        {categoriesMap[cat].map(sub => (
+                          <button
+                            key={sub}
+                            onClick={() => {
+                              setActiveCategory(cat);
+                              setActiveSubcategory(sub);
+                              if (location.pathname !== '/') navigate('/');
+                              setTimeout(() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                            }}
+                            className={`w-full text-left px-4 py-3 hover:bg-brand-gold hover:text-brand-black transition-all duration-200 text-xs font-bold tracking-[0.1em] uppercase ${activeSubcategory === sub ? 'text-brand-gold' : 'text-brand-white/50'}`}
+                          >
+                            {sub}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
 
             <div className="flex items-center gap-4">
